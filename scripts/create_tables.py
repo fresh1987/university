@@ -1,15 +1,8 @@
 #### CREATE_TABLE script ####
 
-#db_name = input("Input dataBase name")
-db_name = "university"
-
-import psycopg2
-
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-#cur.execute("INSERT INTO univers (ID,NAME,AGE,ADDRESS,SALARY) \
-#      VALUES (1, 'Paul', 32, 'California', 20000.00 ) ")
-cur = conn.cursor()
-
+import sys
+sys.path.append("../university_app/cgi-bin")
+from common_function import conn, cur
 
 cur.execute("CREATE SEQUENCE specialty_ids;")
 cur.execute("CREATE SEQUENCE discipline_ids;")
@@ -32,7 +25,7 @@ cur.execute('''
             faculty VARCHAR(100),
             specialty VARCHAR(100),
             FOREIGN KEY (faculty, specialty) REFERENCES specialties (faculty, specialty)  ON UPDATE CASCADE ON DELETE CASCADE,
-            PRIMARY KEY (discipline_id, discipline_name)            
+            PRIMARY KEY (discipline_id)            
             );''')
 
 cur.execute('''
@@ -53,9 +46,8 @@ cur.execute('''
             mark VARCHAR(10) NOT NULL,
             stud_id INTEGER REFERENCES students ON UPDATE CASCADE ON DELETE CASCADE,
             discipline_id INTEGER,
-            discipline_name VARCHAR(100),
-            FOREIGN KEY (discipline_id, discipline_name) REFERENCES disciplines (discipline_id, discipline_name)  ON UPDATE CASCADE ON DELETE CASCADE,
-            PRIMARY KEY (stud_id, discipline_id)
+            PRIMARY KEY (stud_id, discipline_id),
+            FOREIGN KEY (discipline_id) REFERENCES disciplines (discipline_id)  ON UPDATE CASCADE ON DELETE CASCADE
             );''')
 
 conn.commit()

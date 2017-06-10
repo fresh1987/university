@@ -2,29 +2,14 @@
 # -*- coding: utf-8 -*-
 
 
-import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-from common_function import get_faculties_specialties_mas
-
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
-
+from common_function import conn, cur, print_head, get_faculties_specialties_mas
 
 def main():
     (faculties, specialties)  = get_faculties_specialties_mas(cur)
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Оценки</title>
-    		</head>""")
+    print_head("Оценки")
     print("""
         <body>
             <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>

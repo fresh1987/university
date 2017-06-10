@@ -3,20 +3,18 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import conn, cur, print_head,print_body_head, get_values_from_address_bar
 
+# Get information of student by student_id
 def get_from_students(stud_id):
     cur.execute("SELECT stud_id, surname, name, patronymic, group_no, stud_faculty, stud_specialty FROM students WHERE stud_id = %s;",  [stud_id])
     row = cur.fetchall()
     return row[0]
 
+# Get discipline_id  and marks by student_id
 def get_discipline_and_marks(stud_id):
     discipline_and_marks = []
     cur.execute("SELECT discipline_id, mark FROM marks WHERE stud_id = %s;",  [stud_id])
@@ -32,25 +30,14 @@ def get_discipline_and_marks(stud_id):
 
 def main():
     form = cgi.FieldStorage()
-    stud_id = form.getfirst("stud_id", "не задано")
+    [stud_id] = get_values_from_address_bar(form, "stud_id")
 
     student_mas = get_from_students(stud_id)
     discipline_and_marks = get_discipline_and_marks(stud_id)
 
-
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Результат поиска студентов</title>
-    		</head>""")
+    print_head("Результат поиска студентов")
+    print_body_head("ПРОФИЛЬ СТУДЕНТА", "no")
     print("""
-        <body>
-            <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-            <h3>ПРОФИЛЬ ТСУДЕНТА</h3>
-            <h3>
             <table border="0" align="left"  cellpadding="5">
                 <tr>
                     <td>

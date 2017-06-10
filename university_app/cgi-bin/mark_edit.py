@@ -3,16 +3,10 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
-
-from common_function import marks_mas, examination_form_mas
+from common_function import conn, cur, print_head, marks_mas, examination_form_mas, print_body_head, get_values_from_address_bar
 
 def get_examination_form(discipline_id):
     cur.execute("SELECT examination_form FROM disciplines WHERE discipline_id=%s;", [discipline_id])
@@ -27,28 +21,12 @@ def get_examination_form(discipline_id):
 def main():
 
     form = cgi.FieldStorage()
-    mark_id = form.getfirst("mark_id", "не задано")
-    mark = form.getfirst("mark", "не задано")
-    stud_id = form.getfirst("stud_id", "не задано")
-    discipline_name = form.getfirst("discipline_name", "не задано")
-    discipline_id = form.getfirst("discipline_id", "не задано")
+    [mark_id, mark, stud_id, discipline_name, discipline_id] = get_values_from_address_bar(form, "mark_id", "mark", "stud_id", "discipline_name", "discipline_id")
 
     examination_form_mas = get_examination_form(discipline_id)
-
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Редактирование</title>
-    		</head>""")
-    print("""
-        <body>
-            <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-            <h3>РЕДАКТИРОВАНИЕ ОЦЕНКИ</h3>
-            <h3>
-            <table border="0" width="1800px" align="left"  cellpadding="5">
+    print_head("Редактирование")
+    print_body_head("РЕДАКТИРОВАНИЕ ОЦЕНКИ", "yes")
+    print("""<table border="0" width="1800px" align="left"  cellpadding="5">
                 <form action="/cgi-bin/mark_edit_finish.py">
                     <tr>
                         <td>

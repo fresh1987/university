@@ -3,14 +3,10 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import conn, cur, print_head, print_body_head, get_values_from_address_bar
 
 def update_base(mark, mark_id):
     cur.execute("UPDATE marks SET mark=%s WHERE mark_id = %s;",[mark, mark_id])
@@ -19,28 +15,12 @@ def update_base(mark, mark_id):
 
 def main():
     form = cgi.FieldStorage()
-    mark = form.getfirst("mark", "не задано")
-    mark_id = form.getfirst("mark_id", "не задано")
+    [mark, mark_id] = get_values_from_address_bar(form, "mark", "mark_id")
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-        	    	<html lang="en">
-    	    	    <head>
-        	    	    <!-- Meta Tag -->
-    	    	        <meta charset="UTF-8">
-           		        <title>Изменение оценки</title>
-            		</head>""")
-    print("""
-                <body>
-                    <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2> """)
-
+    print_head("Изменение оценки")
     update_base(mark, mark_id)
-    print(""" <h3>РЕДАКТИРОВАНИЕ ВЫПОЛНЕНО УСПЕШНО</h3> """)
+    print_body_head("РЕДАКТИРОВАНИЕ ВЫПОЛНЕНО УСПЕШНО", "yes")
     print("""  
-                <form action="/index.html">
-                    <p><input type="submit" value="НА ГЛАВНУЮ"> </p>
-                </form>
-
             </body>
         </html>""")
 

@@ -3,16 +3,11 @@
 
 
 import cgi
-import psycopg2
-from common_function import check_fac_spec
 import cgitb
 cgitb.enable()
-from common_function import check_discipline_on_faculty, check_fac_spec
 
+from common_function import conn, cur, print_head, print_body_head, check_discipline_on_faculty, check_fac_spec, get_values_from_address_bar
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
 
 def add_to_base(discipline_name, faculty, specialty, examination_form):
     cur.execute("INSERT INTO disciplines (discipline_name, faculty, specialty, examination_form) VALUES (%s, %s, %s, %s);", [discipline_name, faculty, specialty, examination_form])
@@ -21,39 +16,20 @@ def add_to_base(discipline_name, faculty, specialty, examination_form):
 
 def main():
     form = cgi.FieldStorage()
-    discipline_name = form.getfirst("discipline_name", "не задано")
-    faculty = form.getfirst("faculty", "не задано")
-    specialty = form.getfirst("specialty", "не задано")
-    examination_form = form.getfirst("examination_form", "не задано")
+    [discipline_name, faculty, specialty, examination_form] = get_values_from_address_bar(form,"discipline_name", "faculty", "specialty", "examination_form")
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-        	    	<html lang="en">
-    	    	    <head>
-        	    	    <!-- Meta Tag -->
-    	    	        <meta charset="UTF-8">
-           		        <title>Добавление дисциплины</title>
-            		</head>""")
-    print("""
-                <body>
-                    <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2> """)
+    print_head("Добавление дисциплины")
 
     if check_fac_spec(cur, faculty, specialty):
         if not check_discipline_on_faculty(cur, faculty,  discipline_name, specialty):
             add_to_base(discipline_name, faculty, specialty, examination_form)
-            print(""" <h3>ИНФОРМАЦИЯ О НОВОЙ ДИСЦИПЛИНЕ ВНЕСЕНА УСПЕШНО</h3> """)
+            print_body_head("ИНФОРМАЦИЯ О НОВОЙ ДИСЦИПЛИНЕ ВНЕСЕНА УСПЕШНО", "yes")
         else:
-            print(""" <h3>ДИСЦИПЛИНА С ТАКИМ ИМЕНЕМ УЖЕ ЕСТЬ НА УКАЗАННОЙ СПЕЦИАЛЬНОСТИ ВЫБРАННОГО ФАКУЛЬТЕТА</h3>""")
+            print_body_head("ДИСЦИПЛИНА С ТАКИМ ИМЕНЕМ УЖЕ ЕСТЬ НА УКАЗАННОЙ СПЕЦИАЛЬНОСТИ ВЫБРАННОГО ФАКУЛЬТЕТА", "yes")
     else:
-        print("""     <h3>НА ВЫБРАННОМ ФАКУЛЬТЕТЕ НЕТ УКАЗАННОЙ СПЕЦИАЛЬНОСТИ </h3>
-                        <form action="/cgi-bin/discipline_add_input.py">
-                            <p><input type="submit" value="НАЗАД"> </p>
-                        </form>""")
+        print_body_head("НА ВЫБРАННОМ ФАКУЛЬТЕТЕ НЕТ УКАЗАННОЙ СПЕЦИАЛЬНОСТИ", "yes")
+
     print("""  
-                <form action="/index.html">
-                    <p><input type="submit" value="НА ГЛАВНУЮ"> </p>
-                </form>
-                
             </body>
         </html>""")
 

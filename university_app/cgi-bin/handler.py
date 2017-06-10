@@ -3,33 +3,12 @@
 
 import cgi
 import html
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import conn, cur, print_head, print_body_head, get_values_from_address_bar
 
-def get_values_for_request():
-    form = cgi.FieldStorage()
-    faculty = form.getfirst("faculty", "не задано")
-    specialty = form.getfirst("specialty", "не задано")
-    group_nom = form.getfirst("group_nom", "не задано")
-    surname = form.getfirst("surname", "не задано")
-    name = form.getfirst("name", "не задано")
-    patronymic = form.getfirst("patronymic", "не задано")
-
-    faculty = html.escape(faculty)
-    specialty = html.escape(specialty)
-    group_nom = html.escape(group_nom)
-    surname = html.escape(surname)
-    name = html.escape(name)
-    patronymic= html.escape(patronymic)
-    return(faculty, specialty, group_nom, surname, name, patronymic)
-
-
+# find student in database
 def find_students(faculty, specialty, group_nom, surname, name, patronymic):
     if specialty != "не задано":
         students_mas = []
@@ -74,7 +53,8 @@ def find_students(faculty, specialty, group_nom, surname, name, patronymic):
 
 
 def main():
-    (faculty, specialty, group_nom, surname, name, patronymic) = get_values_for_request()
+    form = cgi.FieldStorage()
+    [faculty, specialty, group_nom, surname, name, patronymic] = get_values_from_address_bar(form, "faculty", "specialty", "group_nom", "surname", "name", "patronymic")
 
     # Проверяем что № группы корректный
     try:
@@ -82,24 +62,10 @@ def main():
     except:
         students_mas = []
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-		<html lang="en">
-		<head>
-		    <!-- Meta Tag -->
-		    <meta charset="UTF-8">
-		    <title>Результат поиска студентов</title>
-		</head>
-		<body>""")
-
-    print("""
-        <body>
-       		<h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-            <h3>РЕЗУЛЬТАТЫ ПОИСКА</h3>
-            <h3>""")
+    print_head("Результат поиска студентов")
+    print_body_head("РЕЗУЛЬТАТЫ ПОИСКА", "no")
     if students_mas != []:
         print(""" 
-
             <table border="1" width="700px" align="left"  cellpadding="5" >   
                 <tr align="center" height="30px">
                     <td><p><nobr>№ студентческого билета</nobr></p></td>
@@ -130,9 +96,13 @@ def main():
             "</table>")
 
     else:
-        print(""" <h1>Нет такого студента</h1>""")
+        print("""
+                <tr>
+                    <td>
+                        <h1><nobr>Нет такого студента</nobr></h1>
+                    </td>
+                </tr>""")
     print("""
-            </h3>
         </body>
    </html>""")
 

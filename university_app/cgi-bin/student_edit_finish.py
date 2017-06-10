@@ -3,22 +3,13 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
-
-from common_function import check_fac_spec
+from common_function import conn, cur, print_head, check_fac_spec, print_body_head, get_values_from_address_bar
 
 
 def update_base(stud_id, surname, name, patronymic, group_no, stud_faculty, stud_specialty):
-    db_name = "university"
-    conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-    cur = conn.cursor()
     cur.execute("UPDATE students SET surname=%s, name=%s, patronymic=%s, group_no=%s, stud_faculty=%s, stud_specialty=%s WHERE stud_id = %s;", \
                 [surname, name, patronymic, group_no, stud_faculty, stud_specialty, stud_id])
     conn.commit()
@@ -26,36 +17,16 @@ def update_base(stud_id, surname, name, patronymic, group_no, stud_faculty, stud
 
 def main():
     form = cgi.FieldStorage()
-    stud_id = form.getfirst("stud_id", "не задано")
-    print(stud_id)
-    surname = form.getfirst("surname", "не задано")
-    name = form.getfirst("name", "не задано")
-    patronymic = form.getfirst("patronymic", "не задано")
-    group_no = form.getfirst("group_no", "не задано")
-    stud_faculty = form.getfirst("stud_faculty", "не задано")
-    stud_specialty = form.getfirst("stud_specialty", "не задано")
+    [stud_id, surname, name, patronymic, group_no, stud_faculty, stud_specialty] = get_values_from_address_bar(form,"stud_id", "surname", "name", "patronymic", "group_no", "stud_faculty", "stud_specialty")
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-        	    	<html lang="en">
-    	    	    <head>
-        	    	    <!-- Meta Tag -->
-    	    	        <meta charset="UTF-8">
-           		        <title>Редактировнаие</title>
-            		</head>""")
-    print("""
-                <body>
-                    <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2> """)
-
+    print_head("Редактировнаие")
     if check_fac_spec(cur, stud_faculty, stud_specialty):
         update_base(stud_id, surname, name, patronymic, group_no, stud_faculty, stud_specialty)
-        print(""" <h3>РЕДАКТИРОВАНИЕ ВЫПОЛНЕНО УСПЕШНО</h3> """)
+        print_body_head("РЕДАКТИРОВАНИЕ ВЫПОЛНЕНО УСПЕШНО", "yes")
     else:
-        print(""" <h3>НА ФАКУЛЬТЕТЕ НЕТ ТАКОЙ СПЕЦИАЛЬНОСТИ</h3>""")
-    print("""            <form action="/index.html">
-                    <p><input type="submit" value="НА ГЛАВНУЮ"> </p>
-                </form>
-
+        print_body_head("НА ФАКУЛЬТЕТЕ НЕТ ТАКОЙ СПЕЦИАЛЬНОСТИ", "yes")
+        print("""
+    
             </body>
         </html>""")
 

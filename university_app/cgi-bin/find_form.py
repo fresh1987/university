@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import psycopg2
-
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import conn, cur, print_head, print_body_head
 
 cur.execute("SELECT faculty, specialty from specialties")
 rows = cur.fetchall()
@@ -19,19 +15,9 @@ faculties.sort()
 specialties.sort()
 
 
-print("Content-type: text/html\n")
-print("""<!DOCTYPE html>
-		<html lang="en">
-		<head>
-		    <!-- Meta Tag -->
-		    <meta charset="UTF-8">
-		    <title>Форма поиска студентов</title>
-		</head>""")
-
+print_head("Форма поиска студентов")
+print_body_head("ФОРМА ПОИСКА СТУДНТОВ", "no")
 print("""
-<body>
-   <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-   <h3>ФОРМА ПОИСКА СТУДНТОВ</h3>
    <form action="/cgi-bin/handler.py">
    <table>
        <tr>

@@ -3,40 +3,21 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-from common_function import get_examination_form_mas
+from common_function import conn, cur, print_head, print_body_head, get_examination_form_mas, get_values_from_address_bar
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
 
 def main():
 
     form = cgi.FieldStorage()
-    discipline_id = form.getfirst("discipline_id", "не задано")
-    discipline_name  = form.getfirst("discipline_name", "не задано")
-    examination_form = form.getfirst("examination_form", "не задано")
-    faculty = form.getfirst("faculty", "не задано")
-    specialty = form.getfirst("specialty", "не задано")
+    [discipline_id, discipline_name, examination_form, faculty, specialty] = get_values_from_address_bar(form, "discipline_id", "discipline_name", "examination_form", "faculty", "specialty")
     examination_form_mas = get_examination_form_mas(cur)
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Редактирование</title>
-    		</head>""")
+    print_head("Редактирование")
+    print_body_head("РЕДАКТИРОВАНИЕ ДИСЦИПЛИНЫ", "yes")
     print("""
-        <body>
-            <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-            <h3>РЕДАКТИРОВАНИЕ ДИСЦИПЛИНЫ</h3>
-            <h3>
             <table border="0" width="1200px" align="left"  cellpadding="5">
                 <tr>
                     <td> Данные из БД:</td>

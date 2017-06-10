@@ -3,56 +3,47 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-from common_function import check_fac_spec
-
-
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import check_fac_spec, conn, cur, print_head, print_body_head, get_values_from_address_bar
 
 def get_marks_base(faculty, specialty):
-    cur.execute("SELECT discipline_id FROM disciplines WHERE faculty=%s AND specialty=%s;", [faculty, specialty])
-    discipline_id_mas = cur.fetchall()
+    discipline_id_mas = []
+    discipline_name_mas = []
+    cur.execute("SELECT discipline_id, discipline_name FROM disciplines WHERE faculty=%s AND specialty=%s;", [faculty, specialty])
+    mas = cur.fetchall()
+    for i in mas:
+        discipline_id_mas.append(i[0])
+        discipline_name_mas.append(i[1])
 
     mas = []
-    for i in discipline_id_mas:
-        cur.execute("SELECT mark_id, mark, stud_id, discipline_name, discipline_id FROM marks WHERE discipline_id=%s;", [i[0]])
-        mas.extend(cur.fetchall())
-    return mas
+    for counter, i in enumerate(discipline_id_mas):
+        cur.execute("SELECT mark_id, mark, stud_id, discipline_id FROM marks WHERE discipline_id=%s;", [i])
+        for j in cur.fetchall():
+            list_j = list(j)
+            list_j.append(discipline_name_mas[counter])
+            mas.append(list_j)
+        #print(mas)
+    return [mas]
 
 
 
 def main():
     form = cgi.FieldStorage()
-    faculty = form.getfirst("faculty", "не задано")
-    specialty = form.getfirst("specialty", "не задано")
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-            <html lang="en">
-        		<head>
-            	    <!-- Meta Tag -->
-            	    <meta charset="UTF-8">
-                   	<title>Оценки</title>
-            	</head>""")
+    [faculty, specialty] = get_values_from_address_bar(form, "faculty", "specialty")
+
+    print_head("Оценки")
     if not check_fac_spec(cur, faculty, specialty):
-        print(""" 
-                <h3>НА ФАКУЛЬТЕТЕ НЕТ ВЫБРАННОЙ СПЕЦИАЛЬНОСТИ</h3>
-                    <form action="/cgi-bin/marks_view.py">
-                        <p><input type="submit" value="НАЗАД"> </p>
-                    </form>""")
+        print_body_head("НА ФАКУЛЬТЕТЕ НЕТ ВЫБРАННОЙ СПЕЦИАЛЬНОСТИ", "yes")
     else:
-        mas = get_marks_base(faculty, specialty)
+        [mas] = get_marks_base(faculty, specialty)
 
+        print_body_head("ОЦЕНКИ СТУДЕНТОВ", "yes")
         print("""
-            <body>
-                <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-                <h3>ОЦЕНКИ СТУДЕНТОВ </h3>
+            <tr>
+                <td>
                 <h4>ФАКУЛЬТЕТА: """)
         print(faculty)
         print("""</h4>
@@ -82,7 +73,7 @@ def main():
             print("""
                         <tr>   """)
             print("""<td>""", i[2], "</td>")
-            print("""<td>""", i[3], "</td>")
+            print("""<td>""", i[4], "</td>")
             print("""<td>""", i[1], "</td>")
             print("""   <td>
             
@@ -97,11 +88,11 @@ def main():
             print(i[2], end='')
             print("""\"         >
                                 <input type="hidden" name="discipline_name" value=\"""", end='')
-            print(i[3], end='')
+            print(i[4], end='')
 
             print("""\"         >
                                 <input type="hidden" name="discipline_id" value=\"""", end='')
-            print(i[4], end='')
+            print(i[3], end='')
 
             print("""\"         >
                                 <input type="submit" value="Редактировать">

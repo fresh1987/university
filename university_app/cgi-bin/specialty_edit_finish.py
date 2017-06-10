@@ -3,15 +3,10 @@
 
 
 import cgi
-import psycopg2
 
 import cgitb
 cgitb.enable()
-from common_function import check_fac_spec
-
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import conn, cur, print_head, check_fac_spec, print_body_head, get_values_from_address_bar
 
 def update_base(specialty_id, faculty, specialty):
     cur.execute("UPDATE specialties SET specialty = %s, faculty = %s WHERE specialty_id = %s;", [specialty, faculty, specialty_id])
@@ -20,32 +15,16 @@ def update_base(specialty_id, faculty, specialty):
 
 def main():
     form = cgi.FieldStorage()
-    specialty_id = form.getfirst("specialty_id", "не задано")
-    faculty = form.getfirst("faculty", "не задано")
-    specialty = form.getfirst("specialty", "не задано")
+    [specialty_id, faculty, specialty] = get_values_from_address_bar(form, "specialty_id", "faculty", "specialty")
 
-
-
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Редактирование</title>
-    		</head>""")
+    print_head("Редактирование")
     if not check_fac_spec(cur, faculty, specialty):
         update_base(specialty_id, faculty, specialty)
-        print("""
-            <body>
-                <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-                <h3>РЕДАКТИРОВАНИЕ ВЫПОЛНЕНО УСПЕШНО</h3>""")
+        print_body_head("РЕДАКТИРОВАНИЕ ВЫПОЛНЕНО УСПЕШНО", "yes")
     else:
-        print("""ВВЕДЕННАЯ ИНФОРМАЦИЯ ПОВТОРЯЕТ НАЧАЛЬНУЮ   ЛИБО    УКАЗАННАЯ СПЕЦИАЛЬНОСТЬ УЖЕ ЕСТЬ НА ВЫБРАННОМ ФАКУЛЬТЕТЕ""")
+        print_body_head("УКАЗАННАЯ СПЕЦИАЛЬНОСТЬ УЖЕ ЕСТЬ НА ВЫБРАННОМ ФАКУЛЬТЕТЕ", "yes")
+
     print("""
-                <form action="/index.html">
-                    <p><input type="submit" value="НА ГЛАВНУЮ"> </p>
-                </form>
        </body>
    </html>""")
 

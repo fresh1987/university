@@ -3,15 +3,10 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
 
-from common_function import check_fac_spec
+from common_function import conn, cur, print_head, check_fac_spec, print_body_head, get_values_from_address_bar
 
 def add_to_base(faculty, specialty):
     cur.execute("INSERT INTO specialties (faculty,specialty) VALUES (%s, %s);", [faculty, specialty])
@@ -20,30 +15,18 @@ def add_to_base(faculty, specialty):
 
 def main():
     form = cgi.FieldStorage()
-    faculty = form.getfirst("faculty", "не задано")
-    specialty = form.getfirst("specialty", "не задано")
+    [faculty, specialty] = get_values_from_address_bar(form, "faculty", "specialty")
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-    	    	<html lang="en">
-    		    <head>
-        		    <!-- Meta Tag -->
-    	    	    <meta charset="UTF-8">
-           		    <title>Добавление</title>
-        		</head>""")
+
+
+    print_head("Добавление")
     if not check_fac_spec(cur, faculty, specialty):
         add_to_base(faculty, specialty)
-        print("""
-            <body>
-                <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-                <h3>ИНФОРМАЦИЮ О НОВОМ НАПРАВЛЕНИИ ПОДГОТОВКИ ВНЕСЕНА УСПЕШНО</h3>""")
+        print_body_head("ИНФОРМАЦИЮ О НОВОМ НАПРАВЛЕНИИ ПОДГОТОВКИ ВНЕСЕНА УСПЕШНО", "yes")
     else:
-        print("""УКАЗАННАЯ СПЕЦИАЛЬНОСТЬ УЖЕ ЕСТЬ НА ВЫБРАННОМ ФАКУЛЬТЕТЕ""")
+        print_body_head("УКАЗАННАЯ СПЕЦИАЛЬНОСТЬ УЖЕ ЕСТЬ НА ВЫБРАННОМ ФАКУЛЬТЕТЕ", "yes")
 
     print("""
-            <form action="/index.html">
-                <p><input type="submit" value="НА ГЛАВНУЮ"> </p>
-            </form>
        </body>
    </html>""")
 

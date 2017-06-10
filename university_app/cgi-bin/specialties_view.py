@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import conn, cur, print_head, print_body_head
 
 def get_from_base():
     cur.execute("SELECT specialty_id, faculty, specialty FROM specialties ORDER BY faculty, specialty;")
@@ -18,37 +12,38 @@ def get_from_base():
     return rows
 
 def main():
-
+    # get list of information of specialities
     mas = get_from_base()
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Направления подготовки</title>
-    		</head>""")
-    print("""
-        <body>
-            <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
-            <h3>НАПРАВЛЕНИЯ ПОДГОТОВКИ</h3>
-            <h3>
-                <form action="/cgi-bin/specialty_add_input.py">
-                    <p><input type="submit" value="Добавить новую запись"> </p>
-                </form>
 
-            <table border="1" width="950px" align="left"  cellpadding="5">
+    print_head("Направления подготовки")
+    print_body_head("НАПРАВЛЕНИЯ ПОДГОТОВКИ", "no")
+
+    print("""
+                <tr>
+                    <td>
+                        <form action="/cgi-bin/specialty_add_input.py">
+                            <p><input type="submit" value="Добавить новую запись"> </p>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            </td>
+            </tr>
+
+            <tr>
+            <td>
+            <table border="1" width="800px" align="left"  cellpadding="5">
                 <tr align="center" height="30px">
-                    <td width="300px">Факультет</td>
-                    <td width="300px">Специальность</td>
+                    <td width="250px">Факультет</td>
+                    <td width="250px">Специальность</td>
                     <td></td>
                     <td></td>
                 </tr>""")
     for i in mas:
         print("""
                 <tr>   """)
-        print(     """<td width="400px">""", i[1], "</td>" )
-        print(     """<td width="400px">""", i[2], "</td>" )
+        print(     """<td width="250px">""", i[1], "</td>" )
+        print(     """<td width="250px">""", i[2], "</td>" )
 
         print("""   <td>
                         <form action="/cgi-bin/specialty_edit.py">
@@ -77,7 +72,10 @@ def main():
                 </tr>   """)
 
     print("""
-            </table> 
+            </table>
+            </td>
+            </tr>
+            </table>
        </body>
    </html>""")
 

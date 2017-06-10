@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
+from common_function import conn, cur, print_head
 
 def get_from_base():
     cur.execute("SELECT  discipline_id, discipline_name, faculty, specialty, examination_form FROM disciplines ORDER BY discipline_name;")
@@ -19,14 +13,7 @@ def get_from_base():
 
 def main():
     mas = get_from_base()
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Дисциплины</title>
-    		</head>""")
+    print_head("Дисциплины")
     print("""
         <body>
             <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>

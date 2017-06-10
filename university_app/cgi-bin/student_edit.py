@@ -3,39 +3,19 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
 
-db_name = "university"
-conn = psycopg2.connect(database=db_name, user="admin", password="admin", host="localhost", port="5432")
-cur = conn.cursor()
-
-
-from common_function import get_faculties_specialties_mas
+from common_function import conn, cur, print_head, get_faculties_specialties_mas, get_values_from_address_bar
 
 def main():
 
     form = cgi.FieldStorage()
-    stud_id = form.getfirst("stud_id", "не задано")
-    surname = form.getfirst("surname", "не задано")
-    name = form.getfirst("name", "не задано")
-    patronymic = form.getfirst("patronymic", "не задано")
-    group_no = form.getfirst("group_no", "не задано")
-    stud_faculty = form.getfirst("stud_faculty", "не задано")
-    stud_specialty = form.getfirst("stud_specialty", "не задано")
+    [stud_id, surname, name, patronymic, group_no, stud_faculty, stud_specialty] = get_values_from_address_bar(form, "stud_id", "surname", "name", "patronymic", "group_no", "stud_faculty", "stud_specialty")
 
     [faculties, specialties] = get_faculties_specialties_mas(cur)
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Редактирование</title>
-    		</head>""")
+    print_head("Редактирование")
     print("""
         <body>
             <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>

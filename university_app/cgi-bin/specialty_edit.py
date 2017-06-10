@@ -3,26 +3,18 @@
 
 
 import cgi
-import psycopg2
-
 import cgitb
 cgitb.enable()
+
+from common_function import print_head, get_values_from_address_bar
+
 
 def main():
 
     form = cgi.FieldStorage()
-    specialty_id = form.getfirst("specialty_id", "не задано")
-    faculty = form.getfirst("faculty", "не задано")
-    specialty = form.getfirst("specialty", "не задано")
+    [specialty_id, faculty, specialty] = get_values_from_address_bar(form, "specialty_id", "faculty", "specialty")
 
-    print("Content-type: text/html\n")
-    print("""<!DOCTYPE html>
-	    	<html lang="en">
-		    <head>
-    		    <!-- Meta Tag -->
-	    	    <meta charset="UTF-8">
-       		    <title>Редактирование</title>
-    		</head>""")
+    print_head("Редактирование")
     print("""
         <body>
             <h2>ГЛАВНЫЙ УНИВЕРСИТЕТ</h2>
